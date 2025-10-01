@@ -21,7 +21,7 @@ def main(mytimer: func.TimerRequest) -> None:
 
     for number in phone_numbers:
         sms_client.send(
-            from_="+18332542843",  # Your ACS phone number
+            from_="+18666576701",  # Your ACS phone number
             to=number,
             message="Reminder: Rent is due tomorrow. Please make your payment."
         )
