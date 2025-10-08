@@ -1,29 +1,27 @@
-import os
-import datetime
 import logging
+import os
 from azure.communication.sms import SmsClient
 import azure.functions as func
 
 def main(mytimer: func.TimerRequest) -> None:
-    utc_timestamp = datetime.datetime.utcnow().replace(
-        tzinfo=datetime.timezone.utc).isoformat()
+    logging.info("Rent reminder function triggered.")
 
-    if mytimer.past_due:
-        logging.info('The timer is past due!')
-
-    # Get connection string from environment
-    connection_string = os.environ["COMMUNICATION_SERVICES_CONNECTION_STRING"]
+    connection_string = os.environ.get("ACS_CONNECTION_STRING")
+    if not connection_string:
+        logging.error("ACS connection string not found.")
+        return
 
     sms_client = SmsClient.from_connection_string(connection_string)
 
-    # Replace with tenant phone numbers
-    phone_numbers = ["+2144296720", ""]
-
-    for number in phone_numbers:
-        sms_client.send(
-            from_="+18666576701",  # Your ACS phone number
-            to=number,
-            message="Reminder: Rent is due tomorrow. Please make your payment."
+    try:
+        response = sms_client.send(
+            from_="+18666576701",
+            to=["+12144296720"],
+            message="REMINDER: Your rent payment is coming up TOMORROW 11/1/2025. Zelle payments are preferred (recipient: 2144296720) or a cashier/bank check made out to Emeka Eni will also be valid. Thank you! Emeka Eni"
         )
 
-    logging.info(f"Python timer trigger function executed at {utc_timestamp}")
+        for r in response:
+            logging.info(f"Message ID: {r.message_id}, To: {r.to}, Success: {r.successful}")
+
+    except Exception as e:
+        logging.error(f"Error sending SMS: {e}")
